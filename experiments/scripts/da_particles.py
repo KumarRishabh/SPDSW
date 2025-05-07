@@ -47,7 +47,9 @@ mem = Memory(
 )
 
 # Set to True to download the data in experiments/data_bci
-DOWNLOAD = False
+# DOWNLOAD = False
+DOWNLOAD = True
+# Set to True to use the data in experiments/data_bci
 
 if DOWNLOAD:
     path_data = download_bci(EXPERIMENTS)

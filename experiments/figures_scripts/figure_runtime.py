@@ -9,6 +9,11 @@ EXPERIMENTS = Path(__file__).resolve().parents[1]
 RESULTS = os.path.join(EXPERIMENTS, "results/runtime.csv")
 FIGURE = os.path.join(EXPERIMENTS, "figures/figure_runtime_d20.pdf")
 
+figures_dir = os.path.dirname(FIGURE)
+if not os.path.exists(figures_dir):
+    os.makedirs(figures_dir)
+
+
 # plt.style.use(
 #     os.path.join(EXPERIMENTS, 'figures_scripts/figures_style.mplstyle')
 # )

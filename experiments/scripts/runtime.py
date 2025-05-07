@@ -20,7 +20,7 @@ parser.add_argument("--ntry", type=int, default=20, help="number of restart")
 args = parser.parse_args()
 
 
-SEED = 2022
+SEED = 2022 # NOTE: Probably the year of the first paper on SPDSW
 NTRY = args.ntry
 EXPERIMENTS = Path(__file__).resolve().parents[1]
 RESULTS = os.path.join(EXPERIMENTS, "results/runtime.csv")
@@ -69,7 +69,6 @@ def run_test(params):
             ot.sinkhorn2(
                 a, b, M, reg=1, numitermax=numitermax, stopThr=stop_thr
             )
-
         elif distance == "aiw":
             M = manifold.dist(x0[:, None], x1[None])**2
             ot.emd2(a, b, M)
@@ -93,12 +92,19 @@ def run_test(params):
 if __name__ == "__main__":
 
     hyperparams = {
-        "n_samples": np.logspace(2, 5, num=10, dtype=int),
-        "ds": [2, 10, 20],
-        "distance": ["lew", "aiw", "sinkhorn", "spdsw", "logsw", "aispdsw"],
-        "n_proj": [200],
-        "numitermax": [10000],
-        "stop_thr": [1e-10],
+        # "n_samples": np.logspace(2, 5, num=10, dtype=int), NOTE: This is not working
+        "n_samples": np.logspace(2, 5, num=5, dtype=int),
+        # "ds": [2, 10, 20],
+        "ds": [2, 5, 10, 20, 30],
+        # "distance": ["lew", "aiw", "sinkhorn", "spdsw", "logsw", "aispdsw"],
+        # "distance": ["spdsw", "logsw", "aispsdw", "aiw"], # Just for testing
+        "distance": ["sinkhorn", "spdsw", "logsw", "aispdsw"],
+        # "n_proj": [200],
+        "n_proj": [100],
+        # "numitermax": [10000],
+        "numitermax": [3000],
+        # "stop_thr": [1e-10],
+        "stop_thr": [1e-5],
         "seed": RNG.choice(10000, NTRY, replace=False)
     }
 
@@ -119,22 +125,27 @@ if __name__ == "__main__":
         break
     
 
+    # Initialize CSV file with headers if it doesn't exist
+    csv_exists = os.path.isfile(RESULTS)
+    
     for params in tqdm(permuts_params):
         try:
             result = run_test(params)
-
-            # Storing results
-            for key in params.keys():
-                if key not in dico_results:
-                    dico_results[key] = [params[key]]
-                else:
-                    dico_results[key].append(params[key])
-
-            dico_results["time"].append(result)
-
+            
+            # Create a dictionary for this single result
+            result_row = {**params, "time": result}
+            
+            # Convert to DataFrame for a single row
+            df_row = pd.DataFrame([result_row])
+            
+            # Write to CSV file (append mode, only write header if file doesn't exist)
+            df_row.to_csv(RESULTS, mode='a', header=not csv_exists, index=False)
+            
+            # After first write, file exists
+            csv_exists = True
+            
         except (KeyboardInterrupt, SystemExit):
             raise
-
-    results = pd.DataFrame(dico_results)
-    results.to_csv(RESULTS)
+        except Exception as e:
+            print(f"Error processing parameters {params}: {e}")
 
