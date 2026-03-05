@@ -55,9 +55,6 @@ if DOWNLOAD:
     path_data = download_bci(EXPERIMENTS)
 
 
-
-
-
 @mem.cache
 def run_test(params):
 

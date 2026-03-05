@@ -89,7 +89,7 @@ class Betaprime:
 if __name__ == "__main__":
     d = 3
     n_proj = 10
-    device = "cpu"
+    device = "gpu" if torch.cuda.is_available() else "cpu"
     dtype = torch.float64
 
     # Create random SPD matrices
